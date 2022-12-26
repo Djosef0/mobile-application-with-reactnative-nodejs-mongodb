@@ -20,6 +20,7 @@ if(user){
         message : "User already Exists"});
 }
 
+
 const otp = Math.floor(Math.random() * 100000)
 
 user = await User.create({name ,
