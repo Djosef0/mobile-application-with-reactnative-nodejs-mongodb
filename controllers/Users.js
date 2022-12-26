@@ -51,3 +51,14 @@ await sendMail(email ,
             message : error.message});
     }
 }
+
+export const verify = async (req , res)=>{
+    try{
+   const otp = Number(req.body.otp);
+
+   const user = await User.findById(req.user._id);
+   
+    }catch(error){
+
+    }
+}
