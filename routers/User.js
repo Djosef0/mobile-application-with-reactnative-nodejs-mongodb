@@ -1,5 +1,16 @@
 import express from "express";
-import {addTask, forgetPassword, getMyProfile, login, logout, register , removeTask, updatePassword, updateProfile, updateTask, verify} from "../controllers/Users.js"
+import {
+    addTask,
+    forgetPassword, 
+    getMyProfile,
+    login,
+    logout, 
+    register ,
+    removeTask,
+    updatePassword,
+    updateProfile,
+    updateTask,
+    verify}  from "../controllers/Users.js"
 import { isAuthenticated } from "../middleware/auth.js";
 const router = express.Router();
 
@@ -13,8 +24,9 @@ router.route("/task/:taskId").get(isAuthenticated , updateTask).delete(isAuthent
 router.route("/me").get(isAuthenticated , getMyProfile);
 
 router.route("/updateprofile").put(isAuthenticated , updateProfile)
-router.route("/updatepassword").put(isAuthenticated , updatePassword)
+router.route("/updatepassword").put(isAuthenticated , updatePassword);
 
-router.route("/forgetpassword").post(forgetPassword)
+router.route("/forgetpassword").post(forgetPassword);
+router.route("/resetpassword").put(forgetPassword);
 
 export default router;

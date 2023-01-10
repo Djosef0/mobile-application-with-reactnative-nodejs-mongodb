@@ -318,12 +318,18 @@ res.status(200).json({success : true , message: `OTP sent to ${email}`})
             })
         }
 
+        user.password=newPassword;
         user.resetPasswordOtp = null ; 
         user.resetPasswordOtpExpiry=null;
         await user.save();
+
+        res.status(200).json({success : true ,
+             message :"password changed successfuly"})
          
     } catch(error){
-        res.status(500).json({success : false , message : error.message})
+        res.status(500).json({success : false ,
+             message : error.message})
     }
  }
 
+ 
