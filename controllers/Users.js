@@ -126,3 +126,204 @@ res.status(200).cookie(
 }
 
 }
+
+export const addTask = async(req,res) =>{
+
+    try{
+   const {title , description} = req.body;
+   const user = await User.findById(req.user._id);
+   user.tasks.push({
+    title,
+    description,
+    completed : false , 
+    createdAt : new Date()
+   })
+
+   await user.save();
+
+   res.status(200).json({success : true , message : "task add successfuly"})
+
+    }catch(error){
+        res
+        .status(500)
+        .json({success : false ,
+             message : error.message})
+    }
+    
+ }
+
+ export const removeTask = async(req , res) =>{
+   
+    const {taskId} = req.params;
+ 
+
+    try{
+
+        const user = await User.findById(req.user._id);
+
+        user.tasks = user.tasks.filter((task) => task._id.toString() !== taskId.toString() )
+
+      await user.save();
+
+        res.status(200).json({success : true , message: "Task Removed successfuly"})
+
+
+    }catch(error){
+        res.status(500).json({success : false , message : error.message})
+    }
+ }
+
+
+
+ export const updateTask = async(req , res) =>{
+   
+       try{
+        
+        const {taskId} = req.params;
+        
+        const user = await User.findById(req.user._id);
+
+        user.task = user.tasks.find(
+            (task) => task._id.toString() === taskId.toString()
+             );
+        user.task.completed = !user.task.completed;
+
+        await user.save();
+
+        res.status(200).json({success : true , message: "Task Updated successfuly"})
+
+
+    }catch(error){
+        res.status(500).json({success : false , message : error.message})
+    }
+ }
+
+
+export const getMyProfile = async (req , res )=>{
+ try{
+    const user = await User.findById(req.user._id);
+
+    sendToken(
+        res,
+        user,
+        201,
+        `Welcome back ${user.name}`
+    )
+
+    }catch(error){
+        res.status(500).json({success: false , message : error.message});
+    }
+ }
+
+
+export const updateProfile = async (req , res)=>{
+try {
+
+    const user = await User.findById(req.user._id);
+
+    const {name} = req.body;
+
+    if(name){
+        user.name = name ;
+    } 
+
+    await user.save()
+
+    res.status(200).json({success : true , message : "Profile Updated Successfuly"})
+
+
+}catch(error){
+res.status(500).json({success : false , message : error.message })    
+}
+ }
+
+
+export const updatePassword = async(req , res) =>{
+  
+    try{
+
+        const user = await User.findById(req.user._id).select("+password");
+        const {oldPassword , newPassword} = req.body;
+
+        if(!oldPassword || !newPassword){
+            res.status(400).json({success: false , message : ""})
+        }
+
+        const isMatch = await user.comparePassword(oldPassword);
+
+
+
+
+        if(!isMatch){
+            return res
+            .status(400)
+            .json({success : false ,
+                 message : "invalide Old password"});
+
+        }
+
+        user.password = newPassword ; 
+        await user.save();
+
+        res
+        .status(200)
+        .json({success : true, 
+            message : "Password Updated Successfully" })
+
+    }catch(error){
+        res.status(500).json({success : false , message : error.message});
+    }
+ }
+
+ export const forgetPassword = async (req , res) =>{
+    try{
+         const user = await User.findOne({email});
+         
+         if(!user){
+            res.status(400).json({success : false , message : "Email Invalide"})
+         }
+
+         const otp = Math.floor(Math.random() * 100000)
+
+user.resetPasswordOtp= otp ; 
+user.resetPasswordOtpExpiry = Date.now() + 10*60*1000 ;
+
+await user.save();
+
+await sendMail(email , 
+    "Request for reseting Password", 
+     `Your OTP for reset your Password ${otp}`);
+
+res.status(200).json({success : true , message: `OTP sent to ${email}`})
+
+
+    }catch(error){
+        res.status(500).json({success : false , message : error.message});
+    }
+ }
+
+
+ export const resetPassword= async (req, res)=>{
+    try { 
+
+        const {otp , newPassword} = req.body ; 
+
+        const user = await UserfindOne({resetPasswordOtp : otp ,
+         resetPasswordOtpExpiry :  { $gt : Date.now()}
+        })
+   
+        if(!user){
+            return res.status(400).json({success : false , 
+            message : "OTP invalide or has been expired"
+            })
+        }
+
+        user.resetPasswordOtp = null ; 
+        user.resetPasswordOtpExpiry=null;
+        await user.save();
+         
+    } catch(error){
+        res.status(500).json({success : false , message : error.message})
+    }
+ }
+
