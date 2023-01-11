@@ -7,6 +7,7 @@ import {
     logout, 
     register ,
     removeTask,
+    resetPassword,
     updatePassword,
     updateProfile,
     updateTask,
@@ -27,6 +28,6 @@ router.route("/updateprofile").put(isAuthenticated , updateProfile)
 router.route("/updatepassword").put(isAuthenticated , updatePassword);
 
 router.route("/forgetpassword").post(forgetPassword);
-router.route("/resetpassword").put(forgetPassword);
+router.route("/resetpassword").put(resetPassword);
 
 export default router;

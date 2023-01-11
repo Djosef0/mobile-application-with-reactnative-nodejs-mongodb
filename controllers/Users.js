@@ -10,7 +10,8 @@ export const register  = async (req , res) =>{
 const {name,
        email,
        password} = req.body;
-// const {avatar} = req.files;
+const {avatar} = req.files;
+console.log(avatar)
 
 let user  = await User.findOne({email});
 if(user){
@@ -277,6 +278,8 @@ export const updatePassword = async(req , res) =>{
 
  export const forgetPassword = async (req , res) =>{
     try{
+
+        const {email} = req.body;
          const user = await User.findOne({email});
          
          if(!user){
@@ -308,9 +311,9 @@ res.status(200).json({success : true , message: `OTP sent to ${email}`})
 
         const {otp , newPassword} = req.body ; 
 
-        const user = await UserfindOne({resetPasswordOtp : otp ,
+        const user = await User.findOne({resetPasswordOtp : otp ,
          resetPasswordOtpExpiry :  { $gt : Date.now()}
-        })
+        }).select("+password");
    
         if(!user){
             return res.status(400).json({success : false , 
@@ -332,4 +335,4 @@ res.status(200).json({success : true , message: `OTP sent to ${email}`})
     }
  }
 
- 
+
