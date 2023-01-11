@@ -1,6 +1,8 @@
 import { User } from "../models/users.js";
 import { sendMail } from "../utils/sendMail.js";
 import { sendToken } from "../utils/sendToken.js";
+import cloudinary from "cloudinary";
+import fs from "fs";
 
 
 
@@ -10,8 +12,10 @@ export const register  = async (req , res) =>{
 const {name,
        email,
        password} = req.body;
-const {avatar} = req.files;
-console.log(avatar)
+const avatar = req.files.avatar.tempFilePath;
+console.log(avatar);
+
+
 
 let user  = await User.findOne({email});
 if(user){
@@ -23,14 +27,20 @@ if(user){
 }
 
 
-const otp = Math.floor(Math.random() * 100000)
+const otp = Math.floor(Math.random() * 100000);
+
+const mycloud =  await cloudinary.v2.uploader.upload(avatar , {
+    folder : "todoApp"
+});
+
+fs.rmSync("./tmp" , {recursive : true});
 
 user = await User.create({name ,
      email ,
      password ,
      avatar :{
-       public_id : "",
-       url: "",
+       public_id : mycloud.public_id,
+       url: mycloud.secure_url,
      },
      otp , 
      otp_expiry : new Date(Date.now() + process.env.OTP_EXPIRE*60 * 1000) 
@@ -46,7 +56,8 @@ await sendMail(email ,
     user ,
     201 ,
     "OTP sent to your email , Please verify your Account")
-    
+
+    res.send("ok");
 }catch(error){
         res.status(500).json({
             success : false ,
