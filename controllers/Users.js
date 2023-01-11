@@ -13,8 +13,6 @@ const {name,
        email,
        password} = req.body;
 const avatar = req.files.avatar.tempFilePath;
-console.log(avatar);
-
 
 
 let user  = await User.findOne({email});
@@ -234,10 +232,23 @@ try {
     const user = await User.findById(req.user._id);
 
     const {name} = req.body;
+    const avatar = req.files.avatar.tempFilePath ; 
 
     if(name){
         user.name = name ;
     } 
+    if(avatar){
+      
+const mycloud =  await cloudinary.v2.uploader.upload(avatar , {
+    folder : "todoApp"
+});
+
+fs.rmSync("./tmp" , {recursive : true});
+user.avatar = {
+    public_id : mycloud.public_id,
+    url : mycloud.secure_url,
+}
+    }
 
     await user.save()
 
